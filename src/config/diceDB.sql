@@ -1,0 +1,6 @@
+-- RUN THIS SCRIPT TO CREATE THE DB FOR THE API
+
+CREATE DATABASE dice_game;
+
+USE dice_game;
+
