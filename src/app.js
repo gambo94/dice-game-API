@@ -1,17 +1,20 @@
 const express = require('express');
+const app = express();
 const playerRoutes = require('./routes/routes.player.js')
 
-// express app
-const app = express();
+// Settings
+app.set('port', process.env.PORT || 3000)
 
 
-const db = require('./config/dbConfig');
-db.connect((err) => {
-    if(err) throw err;
-    console.log('Connected');
-}) 
+// Middlewares
+app.use(express.json());
 
-// routes
+
+// Routes
 app.use(playerRoutes);
 
-app.listen(3000, () => console.log('Server running on port 3000'));
+
+// listening to the server
+app.listen(app.get('port'), () => {
+    console.log(`Server running on port ${app.get('port')}`)
+});

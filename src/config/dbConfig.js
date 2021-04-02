@@ -1,13 +1,14 @@
 // setting up the DB
 const mysql = require('mysql');
 
-const dbConfig = {
+
+const pool = mysql.createPool({
+    connectionLimit: 10,
     host: 'localhost',   // example: 'localhost'
     user: 'root',   // example: 'root'
-    password: '',  
+    password: 'Sonoetero94',  
     database: 'dice_game'  // name of the DB
-}
+})
 
-const db = mysql.createConnection(dbConfig);
 
-module.exports = db;
+module.exports = pool;
