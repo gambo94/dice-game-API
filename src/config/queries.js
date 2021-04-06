@@ -1,4 +1,4 @@
-
+const db = require('./dbConfig')
 
 // query for inserting anonymous
 const insertAnonymous = `
@@ -7,12 +7,30 @@ const insertAnonymous = `
 `;
 
 
-// query for user inserted
+// query for inserting unique user 
 const insert = `
     INSERT INTO player (username, sign_up_date)
     VALUES (?, CURRENT_TIMESTAMP);
 `;
 
+// query for rolling dices by user, it creates a game row
+const game = `
+    INSERT INTO game (result, dice_one, dice_two, player_id)
+    VALUES (?, ?, ?, ?)
+`;
+
+// query for the put method, it looks if old_username exists
+const exist = `
+    SELECT exists(SELECT username FROM player WHERE username=?);
+`;
+
+const update = `
+    UPDATE player
+    SET username = ?
+    WHERE username = ?;
+`;
+
+
 module.exports = {
-    insertAnonymous, insert
+    insertAnonymous, insert, game, exist, update
 }

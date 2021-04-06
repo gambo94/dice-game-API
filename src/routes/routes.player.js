@@ -15,4 +15,10 @@ router.get('/players', (req, res) => {
 // creates player
 router.post('/players', playerController.player_create_post);
 
+// updates username
+router.put('/players', playerController.player_update_put);
+
+// plays a game
+router.post('/players/:id/games', playerController.player_plays_post);
+
 module.exports = router;

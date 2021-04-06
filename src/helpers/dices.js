@@ -4,13 +4,8 @@
 const rollDices = () => {
     let numOne = Math.floor(Math.random() * 7) +1;
     let numTwo = Math.floor(Math.random() * 7) +1;
-    if(numOne === 7 && numTwo === 7){
-        console.log(numOne, numTwo);
-        return 'WIN'
-    } else {
-        console.log(numOne, numTwo);
-        return 'LOSE'
-    }
+    let dicePair = [numOne, numTwo];
+    return dicePair;
 }
 
 module.exports = rollDices;
