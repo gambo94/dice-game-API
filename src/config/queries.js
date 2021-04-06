@@ -30,7 +30,13 @@ const update = `
     WHERE username = ?;
 `;
 
+// query for deleting all the game rows of a selected user (by id)
+const remove = `
+    DELETE FROM game
+    WHERE player_id = ?;
+`
+
 
 module.exports = {
-    insertAnonymous, insert, game, exist, update
+    insertAnonymous, insert, game, exist, update, remove
 }

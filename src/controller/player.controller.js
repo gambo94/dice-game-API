@@ -43,7 +43,7 @@ const player_plays_post = (req, res) => {
         if(!err){
             res.json('Dices rolled!');
         } else {
-            throw err;
+            throw new Error('User with this id not found');
         }
     })
 }
@@ -76,6 +76,19 @@ const player_update_put = (req, res) => {
     });
 }
 
+// player_deleteGame_delete
+const player_deleteGame_delete = (req, res) => {
+    let player_id = req.params.id;
+    console.log(player_id);
+    // checking if player won
+    db.query(query.remove, player_id, (err, row, fields) =>{
+        if(!err){
+            res.json('All games of selected user removed');
+        } else {
+            throw new Error('User with id selected not found');
+        }
+    })
+}
 
 // player_index gets list of user
 
@@ -87,5 +100,6 @@ const player_update_put = (req, res) => {
 
 
 module.exports = {
-    player_create_post, player_plays_post, player_update_put
+    player_create_post, player_plays_post, player_update_put, 
+    player_deleteGame_delete
 }

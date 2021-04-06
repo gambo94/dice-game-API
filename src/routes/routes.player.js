@@ -21,4 +21,7 @@ router.put('/players', playerController.player_update_put);
 // plays a game
 router.post('/players/:id/games', playerController.player_plays_post);
 
+// deletes all the game's rows of a player
+router.delete('/players/:id/games', playerController.player_deleteGame_delete);
+
 module.exports = router;
