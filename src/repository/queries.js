@@ -36,7 +36,16 @@ const remove = `
     WHERE player_id = ?;
 `
 
+// query for getting win percentage rate of every user
+const rates = `
+    SELECT player_id, username,
+    COUNT(result) games_played,
+    ROUND(100 * SUM(result = 'WIN') / COUNT(result)) winning_percent
+    FROM game
+    INNER JOIN player ON player_id = id_player
+    GROUP BY player_id;
+`;
 
 module.exports = {
-    insertAnonymous, insert, game, exist, update, remove
+    insertAnonymous, insert, game, exist, update, remove, rates
 }

@@ -15,20 +15,20 @@ const insertAnonymous = () => {
     return new Promise((resolve, reject) =>{
         db.query(query.insertAnonymous, (err, row, fields) =>{
             if(!err){
-                resolve(true);
+                resolve();
             } else {
-                reject('User already exists, please select another one', err);
+                reject('User already exists, please select another one');
             }
         })
     })
 }
 
-// inserts an anonymous user 
+// inserts a new unique user 
 const insertUser = (username) => {
     return new Promise((resolve, reject) => {
         db.query(query.insert, username, (err, row, fields) =>{
             if(!err){
-                resolve(true);
+                resolve();
             } else {
                 reject('User already exists, please select another one');
             }
@@ -91,7 +91,34 @@ const updatePlayer = (userArr) => {
     })
 }
 
+// deletes all game of a selected user
+const removeGames = (player_id) => {
+    return new Promise((resolve, reject) => {
+        db.query(query.remove, player_id, (err, row, fields) =>{
+            if(!err){
+                resolve('All games of selected user removed');
+            } else {
+                reject('User with id selected not found');
+            }
+        })
+    })
+}
+
+// getting win rate percentage for each user
+const getWinRate = () => {
+    return new Promise ((resolve, reject) => {
+        db.query(query.rates, (err, row, fields) => {
+            if(!err && row.length > 0){
+                resolve(row);
+            } else if(row.length === 0){
+                reject('No one played the game :(')
+                } else {
+                reject(err);
+            }
+        })
+    })
+}
 
 
-
-module.exports = { rollDices, insertAnonymous, insertUser, insertRoll, updatePlayer, playerExist };
+module.exports = { rollDices, insertAnonymous, insertUser, 
+    insertRoll, updatePlayer, playerExist, removeGames, getWinRate };

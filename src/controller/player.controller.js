@@ -5,7 +5,7 @@ const player_create_post = async (req, res) => {
     // if no user found inserts anonymous player
     if(req.body.username === ""){
         try {
-            const itWorks = await service.insertAnonymous();
+            await service.insertAnonymous();
             res.json('Successfully saved');
         } catch (error) {
             res.status(409).send({error})
@@ -44,28 +44,34 @@ const player_update_put = async (req, res) => {
         // this function checks if the username exists and returns a promise with an array containing the old and new user
         let userArr = await service.playerExist(old_username, new_username);
         // this function updates the user
-        await service.updatePlayer(userArr)
-            .then(() => res.json('User updated successfully'));
+        await service.updatePlayer(userArr);
+        res.json('User updated successfully');
     } catch (error) {
         console.log(error);
     }
 }
 
 // player_deleteGame_delete
-const player_deleteGame_delete = (req, res) => {
-    let player_id = req.params.id;
-    console.log(player_id);
-    // checking if player won
-    db.query(query.remove, player_id, (err, row, fields) =>{
-        if(!err){
-            res.json('All games of selected user removed');
-        } else {
-            throw new Error('User with id selected not found');
-        }
-    })
+const player_deleteGame_delete = async (req, res) => {
+    try {
+        let player_id = req.params.id;
+        await service.removeGames(player_id);
+        res.json('All games of selected user removed');
+    } catch (error) {
+        console.log(error);
+    }
 }
 
-// player_index gets list of user
+// player_winRate_get gets win rate percentage of each user
+const player_winRate_get = async (req, res) => {
+    try {
+        await service.getWinRate()
+        .then((usersWinRate) => res.send({usersWinRate}));
+    } catch (error) {
+        res.status(204).send({error})
+        console.log(error);
+    }
+}
 
 
 // player_details gets single user
@@ -76,5 +82,5 @@ const player_deleteGame_delete = (req, res) => {
 
 module.exports = {
     player_create_post, player_plays_post, player_update_put, 
-    player_deleteGame_delete
+    player_deleteGame_delete, player_winRate_get
 }

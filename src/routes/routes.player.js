@@ -6,11 +6,7 @@ const playerController = require('../controller/player.controller')
 /* ROUTES */
 
 // get list of all players
-router.get('/players', (req, res) => {
-    res.json({
-        test: 'kissy'
-    });
-});
+router.get('/players', playerController.player_winRate_get);
 
 // creates player
 router.post('/players', playerController.player_create_post);
