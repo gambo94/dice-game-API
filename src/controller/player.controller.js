@@ -1,79 +1,54 @@
-
-const db = require('../config/dbConfig');
-const query = require('../config/queries');
-const rollDice = require('../helpers/dices');
+const service = require('../services/service');
 
 // creates a player
-const player_create_post = (req, res) => {
+const player_create_post = async (req, res) => {
     // if no user found inserts anonymous player
     if(req.body.username === ""){
-        db.query(query.insertAnonymous, (err, row, fields) =>{
-            if(!err){
-                res.json('Successfully saved');
-            } else {
-                throw err;
-            }
-        })
+        try {
+            const itWorks = await service.insertAnonymous();
+            res.json('Successfully saved');
+        } catch (error) {
+            res.status(409).send({error})
+        }
     } else {
-        // inserts a player with unique username
+    // inserts a player with unique username
         let username = req.body.username;
-        db.query(query.insert, username, (err, row, fields) =>{
-            if(!err){
-                res.json('Successfully saved');
-            } else {
-                throw new Error('User already exists, please select another one');
-            }
-        })
+        try {
+            await service.insertUser(username);
+            res.json('Successfully saved');
+        } catch (error) {
+            res.status(409).send({error})
+        }
     }
 }
 
 // player_plays_post plays a game
-const player_plays_post = (req, res) => {
-    // rolling dices and storing the results in array
-    let dicesArray = rollDice();
-    let result = '';
-    let player_id = req.params.id;
-    // checking if player won
-    if (dicesArray[0] === 7 && dicesArray[1] ===7){
-        result = 'WIN';
-    } else {
-        result = 'LOSE';
+const player_plays_post = async (req, res) => {
+    try {
+        let player_id = req.params.id;
+        await service.insertRoll(player_id)
+        .then((result) => res.json(`Dices Rolled! You ${result}`));
+    } catch (error) {
+        console.log(error);
+        res.status(400).send({error})
     }
-    db.query(query.game, [result, dicesArray[0], dicesArray[1], player_id], (err, row, fields) =>{
-        if(!err){
-            res.json('Dices rolled!');
-        } else {
-            throw new Error('User with this id not found');
-        }
-    })
 }
 
 
 // player_update_put updates username
-const player_update_put = (req, res) => {
+const player_update_put = async (req, res) => {
     // receives a body with old_username and new_username
-    let old_username = req.body.old_username;
-    let new_username = req.body.new_username;
-    db.query(query.exist, old_username, (err, row, fields) =>{
-        if(!err){
-            let queryName = fields[0].name; // name of column
-            let result = row[0][queryName];
-            console.log(row[0][queryName]); // result of the query 1 = true; 0 = false
-            if(result === 1){
-                db.query(query.update, [new_username, old_username], (err, row, fields) =>{
-                    if(!err){
-                        res.json('Username updated successfully');
-                    }else{
-                        throw err;
-                    }
-                })
-            } else {
-                throw new Error('The username you are looking for was not found');
-            }
-        } else {
-            throw err;
-        }
-    });
+    try {
+        let old_username = req.body.old_username;
+        let new_username = req.body.new_username;
+        // this function checks if the username exists and returns a promise with an array containing the old and new user
+        let userArr = await service.playerExist(old_username, new_username);
+        // this function updates the user
+        await service.updatePlayer(userArr)
+            .then(() => res.json('User updated successfully'));
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 // player_deleteGame_delete

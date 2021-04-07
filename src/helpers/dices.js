@@ -2,8 +2,8 @@
 
 
 const rollDices = () => {
-    let numOne = Math.floor(Math.random() * 7) +1;
-    let numTwo = Math.floor(Math.random() * 7) +1;
+    let numOne = Math.floor(Math.random() * 6) +1;
+    let numTwo = Math.floor(Math.random() * 6) +1;
     let dicePair = [numOne, numTwo];
     return dicePair;
 }

@@ -1,4 +1,4 @@
-const db = require('./dbConfig')
+const db = require('../config/dbConfig')
 
 // query for inserting anonymous
 const insertAnonymous = `
