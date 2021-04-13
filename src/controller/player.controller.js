@@ -66,21 +66,40 @@ const player_deleteGame_delete = async (req, res) => {
 const player_winRate_get = async (req, res) => {
     try {
         await service.getWinRate()
+        // sending the rows received from sql
         .then((usersWinRate) => res.send({usersWinRate}));
     } catch (error) {
-        res.status(204).send({error})
+        res.status(400).send({error})
         console.log(error);
     }
 }
 
 
-// player_details gets single user
+// player_details gets single user games
+const player_games_get = async (req, res) => {
+    try {
+        let player_id = req.params.id;
+        await service.getGames(player_id)
+        .then((playerGames) => res.send({playerGames}));
+    } catch (error) {
+        res.status(400).send(error);
+        console.log(error);
+    }
+}
 
-
-// player_delete
-
+// player_average_ranking returns the average success rate among all players
+const player_average_ranking = async (req, res) => {
+    try {
+        let result = await service.getAverage();
+        res.send({"winning_rate": result});
+    } catch (error) {
+        res.status(400).send(error);
+        console.log(error);
+    }
+}
 
 module.exports = {
     player_create_post, player_plays_post, player_update_put, 
-    player_deleteGame_delete, player_winRate_get
+    player_deleteGame_delete, player_winRate_get, player_games_get,
+    player_average_ranking
 }

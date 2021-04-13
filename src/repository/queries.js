@@ -46,6 +46,15 @@ const rates = `
     GROUP BY player_id;
 `;
 
+// query for getting all the games fields of a player
+const playerGames = `
+    SELECT g.id_game id_game, p.username username, g.dice_one dice_one, g.dice_two dice_two, g.result result
+    FROM game AS g
+    INNER JOIN player AS p
+    ON g.player_id = p.id_player
+    WHERE g.player_id = ?;
+`;
+
 module.exports = {
-    insertAnonymous, insert, game, exist, update, remove, rates
+    insertAnonymous, insert, game, exist, update, remove, rates, playerGames
 }

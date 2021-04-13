@@ -5,7 +5,7 @@ const playerController = require('../controller/player.controller')
 
 /* ROUTES */
 
-// get list of all players
+// get list of all players and their win rate
 router.get('/players', playerController.player_winRate_get);
 
 // creates player
@@ -19,5 +19,12 @@ router.post('/players/:id/games', playerController.player_plays_post);
 
 // deletes all the game's rows of a player
 router.delete('/players/:id/games', playerController.player_deleteGame_delete);
+
+// get all games of a player
+router.get('/players/:id/games', playerController.player_games_get);
+
+// get average of success
+router.get('/players/ranking', playerController.player_average_ranking);
+
 
 module.exports = router;

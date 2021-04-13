@@ -119,6 +119,41 @@ const getWinRate = () => {
     })
 }
 
+// getting single player games
+const getGames = (player_id) => {
+    return new Promise ((resolve, reject) => {
+        db.query(query.playerGames, player_id, (err, row, fields) => {
+            if(!err && row.length > 0){
+                resolve(row);
+            } else if(row.length === 0){
+                reject('It seems the user did not play or doesnt exist :(')
+            } else {
+                reject(err);
+            }
+        })
+    })
+}
+
+
+// average of the percentage of success of all users
+const getAverage = () => {
+    return new Promise ((resolve, reject) => {
+        db.query(query.rates, (err, row, fields) => {
+            if(!err && row.length > 0){
+                // getting all the percentage values stored in array
+                let arrayOfPercentages = row.map(obj => obj.winning_percent);
+                // calculating average
+                let averageRate = (arrayOfPercentages.reduce((a, b) => a + b) / arrayOfPercentages.length).toFixed(2);
+                resolve(averageRate);
+            } else if(row.length === 0){
+                reject('No one played the game :(')
+                } else {
+                reject(err);
+            }
+        })
+    })
+}
 
 module.exports = { rollDices, insertAnonymous, insertUser, 
-    insertRoll, updatePlayer, playerExist, removeGames, getWinRate };
+    insertRoll, updatePlayer, playerExist, removeGames, getWinRate, getGames,
+    getAverage };
