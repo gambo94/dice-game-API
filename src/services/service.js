@@ -1,5 +1,6 @@
 const db = require('../config/dbConfig');
 const query = require('../repository/queries');
+const uniqid  = require('uniqid');
 
 
 // rolls dices and returns an array with two numbers
@@ -12,8 +13,11 @@ const rollDices = () => {
 
 // inserts an anonymous user 
 const insertAnonymous = () => {
+    let id = uniqid();
+    let anonymousName = `ANONYMOUS-${id}`;
+    console.log(anonymousName);
     return new Promise((resolve, reject) =>{
-        db.query(query.insertAnonymous, (err, row, fields) =>{
+        db.query(query.insertAnonymous, anonymousName, (err, row, fields) =>{
             if(!err){
                 resolve();
             } else {
