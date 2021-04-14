@@ -2,22 +2,36 @@ const service = require('../services/service');
 
 // creates a player
 const player_create_post = async (req, res) => {
-    // if no user found inserts anonymous player
+    // if user field is empty, inserts anonymous player
     if(req.body.username === ""){
         try {
             await service.insertAnonymous();
-            res.json('Successfully saved');
+            res.json({
+                success: true,
+                message:'User created successfully'
+            });
         } catch (error) {
-            res.status(409).send({error})
+            res.status(409)
+            .send({
+            success: false,
+            error: error
+        });
         }
     } else {
     // inserts a player with unique username
         let username = req.body.username;
         try {
             await service.insertUser(username);
-            res.json('Successfully saved');
+            res.json({
+                success: true,
+                message:'User created successfully'
+            });
         } catch (error) {
-            res.status(409).send({error})
+            res.status(409)
+            .send({
+            success: false,
+            error: error
+        });
         }
     }
 }
@@ -26,11 +40,18 @@ const player_create_post = async (req, res) => {
 const player_plays_post = async (req, res) => {
     try {
         let player_id = req.params.id;
-        await service.insertRoll(player_id)
-        .then((result) => res.json(`Dices Rolled! You ${result}`));
+        let result = await service.insertRoll(player_id)
+        res.json({
+            success: true,
+            message:`Dices Rolled! You ${result}`
+        });
     } catch (error) {
         console.log(error);
-        res.status(400).send({error})
+        res.status(400)
+            .send({
+            success: false,
+            error: error
+        });
     }
 }
 
@@ -45,9 +66,16 @@ const player_update_put = async (req, res) => {
         let userArr = await service.playerExist(old_username, new_username);
         // this function updates the user
         await service.updatePlayer(userArr);
-        res.json('User updated successfully');
+        res.json({
+            success: true,
+            message:'User updated successfully'
+        });
     } catch (error) {
-        console.log(error);
+        res.status(400)
+            .send({
+            success: false,
+            error: error
+        });
     }
 }
 
@@ -55,22 +83,36 @@ const player_update_put = async (req, res) => {
 const player_deleteGame_delete = async (req, res) => {
     try {
         let player_id = req.params.id;
-        await service.removeGames(player_id);
-        res.json('All games of selected user removed');
+        let existingId = await service.playerExistId(player_id);
+        await service.removeGames(existingId);
+        res.json({
+            success: true,
+            message:'All games of selected user removed'
+        });
     } catch (error) {
-        console.log(error);
+        res.status(400)
+            .send({
+            success: false,
+            error: error
+        });
     }
 }
 
 // player_winRate_get gets win rate percentage of each user
 const player_winRate_get = async (req, res) => {
     try {
-        await service.getWinRate()
+        let usersWinRate = await service.getWinRate()
         // sending the rows received from sql
-        .then((usersWinRate) => res.send({usersWinRate}));
+        res.json({
+            success: true,
+            'users_winning_rates': usersWinRate
+        });
     } catch (error) {
-        res.status(400).send({error})
-        console.log(error);
+        res.status(400)
+            .send({
+            success: false,
+            error: error
+        });
     }
 }
 
@@ -79,11 +121,17 @@ const player_winRate_get = async (req, res) => {
 const player_games_get = async (req, res) => {
     try {
         let player_id = req.params.id;
-        await service.getGames(player_id)
-        .then((playerGames) => res.send({playerGames}));
+        let playerGames = await service.getGames(player_id)
+        res.json({
+            success: true,
+            games: playerGames
+        });
     } catch (error) {
-        res.status(400).send(error);
-        console.log(error);
+        res.status(400)
+            .send({
+            success: false,
+            error: error
+        });
     }
 }
 
@@ -91,15 +139,56 @@ const player_games_get = async (req, res) => {
 const player_average_ranking = async (req, res) => {
     try {
         let result = await service.getAverage();
-        res.send({"winning_rate": result});
+        res.json({
+            success: true,
+            message:`Average winning rate: ${result}%`
+        });
     } catch (error) {
-        res.status(400).send(error);
-        console.log(error);
+        res.status(400)
+            .send({
+            success: false,
+            error: error
+        });
+    }
+}
+
+
+// player_winner returns the username with higher score
+const player_winner = async (req, res) => {
+    try {
+        let winner = await service.getWinner();
+        res.json({
+            success: true,
+            winner: winner
+        });
+    } catch (error) {
+        res.status(400)
+            .send({
+            success: false,
+            error: error
+        });
+    }
+}
+
+// player_loser return the username with higher score
+const player_loser = async (req, res) => {
+    try {
+        let loser = await service.getLoser();
+        res.json({
+            success: true,
+            loser: loser
+        });
+    } catch (error) {
+        res.status(400)
+            .send({
+            success: false,
+            error: error
+        });
     }
 }
 
 module.exports = {
     player_create_post, player_plays_post, player_update_put, 
     player_deleteGame_delete, player_winRate_get, player_games_get,
-    player_average_ranking
+    player_average_ranking, player_winner, player_loser
 }

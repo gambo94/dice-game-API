@@ -19,9 +19,13 @@ const game = `
     VALUES (?, ?, ?, ?)
 `;
 
-// query for the put method, it looks if old_username exists
+// query for the put method, it looks if old_username exists and gives back 1 if true and 0 if false
 const exist = `
     SELECT exists(SELECT username FROM player WHERE username=?);
+`;
+
+const existId = `
+    SELECT exists(SELECT username FROM player WHERE id_player=?);
 `;
 
 const update = `
@@ -55,6 +59,15 @@ const playerGames = `
     WHERE g.player_id = ?;
 `;
 
+// query that returns all users and their winning rates
+const playerPercentage = `
+    SELECT username,
+    ROUND(100 * SUM(result = 'WIN') / COUNT(result)) winning_percent
+    FROM game
+    INNER JOIN player ON player_id = id_player
+    GROUP BY player_id;
+`;
+
 module.exports = {
-    insertAnonymous, insert, game, exist, update, remove, rates, playerGames
+    insertAnonymous, insert, game, exist, update, remove, rates, playerGames, playerPercentage, existId
 }

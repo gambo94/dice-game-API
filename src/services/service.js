@@ -28,7 +28,7 @@ const insertUser = (username) => {
     return new Promise((resolve, reject) => {
         db.query(query.insert, username, (err, row, fields) =>{
             if(!err){
-                resolve();
+                resolve(username);
             } else {
                 reject('User already exists, please select another one');
             }
@@ -58,18 +58,40 @@ const insertRoll = (player_id) => {
     })
 }
 
-// checks if player exists
+// checks if player exists with username provided
 const playerExist = (old_username, new_username) => {
     return new Promise((resolve, reject) => {
         db.query(query.exist, old_username, (err, row, fields) => {
             if(!err){
                 let queryName = fields[0].name;
                 let result = row[0][queryName];
+                console.log(queryName);
+                console.log(result);
                 if(result ===1){
                     let userArr = [old_username, new_username];
                     resolve(userArr);
                 } else {
-                    console.log('User not found, please select an existing one');
+                    reject('User not found, please select an existing one');
+                }
+            } else {
+                reject(err);
+            }
+        })
+    })
+}
+
+// check if player exists with id provided
+const playerExistId = (id) => {
+    return new Promise((resolve, reject) => {
+        db.query(query.existId, id, (err, row, fields) => {
+            if(!err){
+                // the query returns 1 if player exists and 0 if it doesn't
+                let queryName = fields[0].name;
+                let result = row[0][queryName];
+                if(result === 1){
+                    resolve(id);
+                } else {
+                    reject('User not found, please select an existing one');
                 }
             } else {
                 reject(err);
@@ -94,6 +116,7 @@ const updatePlayer = (userArr) => {
 // deletes all game of a selected user
 const removeGames = (player_id) => {
     return new Promise((resolve, reject) => {
+        console.log(player_id);
         db.query(query.remove, player_id, (err, row, fields) =>{
             if(!err){
                 resolve('All games of selected user removed');
@@ -139,21 +162,50 @@ const getGames = (player_id) => {
 const getAverage = () => {
     return new Promise ((resolve, reject) => {
         db.query(query.rates, (err, row, fields) => {
-            if(!err && row.length > 0){
-                // getting all the percentage values stored in array
-                let arrayOfPercentages = row.map(obj => obj.winning_percent);
-                // calculating average
-                let averageRate = (arrayOfPercentages.reduce((a, b) => a + b) / arrayOfPercentages.length).toFixed(2);
+            // getting all the percentage values stored in array
+            let arrayOfPercentages = row.map(obj => obj.winning_percent);
+            // calculating average
+            let averageRate = (arrayOfPercentages.reduce((a, b) => a + b) / arrayOfPercentages.length).toFixed(2);
+            if(averageRate == 0.00){
+                reject('Nobody won so far..');
+            } else {
                 resolve(averageRate);
-            } else if(row.length === 0){
-                reject('No one played the game :(')
-                } else {
-                reject(err);
             }
         })
     })
 }
 
+const getWinner = () => {
+    return new Promise ((resolve, reject) => {
+        // query that returns all users and their winning rates
+        db.query(query.playerPercentage, (err, row, fields) => {
+            let winningPlayer = row.reduce((max, currentPlayer) => max.winning_percent > currentPlayer.winning_percent ? max : currentPlayer);
+            if(winningPlayer.winning_percent === 0){
+                reject('There is no winner, it looks like nobody played or won');
+            } else {
+                resolve(winningPlayer);
+            }
+        })
+    })
+}
+
+const getLoser = () => {
+    return new Promise ((resolve, reject) => {
+        db.query(query.playerPercentage, (err, row, fields) => {
+            // using filter to have an array only with player that have scores > 0 (I've considered that players with 0 as score didn't not play or have always lost the games)
+            let playersWithScoresHigherThanZero = row.filter(player => player.winning_percent > 0);
+            // using reduce to find the lowest score among the ones > 0
+            let loserPlayer = playersWithScoresHigherThanZero.reduce((min, currentPlayer) => min.winning_percent < currentPlayer.winning_percent ? min : currentPlayer);
+            if(loserPlayer.winning_percent === 0){
+                reject('It looks like nobody played');
+            } else {
+                resolve(loserPlayer);
+            }
+        })
+    })
+}
+
+
 module.exports = { rollDices, insertAnonymous, insertUser, 
-    insertRoll, updatePlayer, playerExist, removeGames, getWinRate, getGames,
-    getAverage };
+    insertRoll, updatePlayer, playerExist, playerExistId, removeGames, getWinRate, getGames,
+    getAverage, getWinner, getLoser };
