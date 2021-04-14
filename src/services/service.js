@@ -15,7 +15,6 @@ const rollDices = () => {
 const insertAnonymous = () => {
     let id = uniqid();
     let anonymousName = `ANONYMOUS-${id}`;
-    console.log(anonymousName);
     return new Promise((resolve, reject) =>{
         db.query(query.insertAnonymous, anonymousName, (err, row, fields) =>{
             if(!err){
