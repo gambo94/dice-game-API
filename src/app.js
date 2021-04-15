@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const playerRoutes = require('./routes/routes.player.js')
+const playerRoutes = require('./routes/routes')
 
 // Settings
 app.set('port', process.env.PORT || 3000)

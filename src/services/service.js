@@ -53,9 +53,13 @@ const insertRoll = (player_id) => {
         }
         db.query(query.game, [result, dicesArray[0], dicesArray[1], player_id], (err, row, fields) =>{
             if(!err){
-                resolve(result)
+                if(result === 'WIN' || result === 'LOSE'){
+                    resolve(result)
+                } else {
+                    reject(`There was a problem rolling your dices, try with a correct user :/`);
+                }
             } else {
-                reject(`There was a problem rolling your dices, try with a correct user :/`);
+                reject(err)
             }
         })
     })
@@ -68,8 +72,6 @@ const playerExist = (old_username, new_username) => {
             if(!err){
                 let queryName = fields[0].name;
                 let result = row[0][queryName];
-                console.log(queryName);
-                console.log(result);
                 if(result ===1){
                     let userArr = [old_username, new_username];
                     resolve(userArr);
@@ -119,7 +121,6 @@ const updatePlayer = (userArr) => {
 // deletes all game of a selected user
 const removeGames = (player_id) => {
     return new Promise((resolve, reject) => {
-        console.log(player_id);
         db.query(query.remove, player_id, (err, row, fields) =>{
             if(!err){
                 resolve('All games of selected user removed');
@@ -134,11 +135,13 @@ const removeGames = (player_id) => {
 const getWinRate = () => {
     return new Promise ((resolve, reject) => {
         db.query(query.rates, (err, row, fields) => {
-            if(!err && row.length > 0){
-                resolve(row);
-            } else if(row.length === 0){
-                reject('No one played the game :(')
-                } else {
+            if(!err){
+                if(row.length > 0){
+                    resolve(row);
+                } else if(row.length === 0){
+                    reject('No one played the game :(')
+                }
+            } else {
                 reject(err);
             }
         })
@@ -149,10 +152,19 @@ const getWinRate = () => {
 const getGames = (player_id) => {
     return new Promise ((resolve, reject) => {
         db.query(query.playerGames, player_id, (err, row, fields) => {
-            if(!err && row.length > 0){
-                resolve(row);
-            } else if(row.length === 0){
-                reject('It seems the user did not play or doesnt exist :(')
+            // if(!err && row.length > 0){
+            //     resolve(row);
+            // } else if(row.length === 0){
+            //     reject('It seems the user did not play or doesnt exist :(')
+            // } else {
+            //     reject(err);
+            // }
+            if(!err){
+                if(row.length > 0){
+                    resolve(row);
+                } else if(row.length === 0){
+                    reject('It seems the user did not play or doesnt exist :(')
+                }
             } else {
                 reject(err);
             }
@@ -165,14 +177,18 @@ const getGames = (player_id) => {
 const getAverage = () => {
     return new Promise ((resolve, reject) => {
         db.query(query.rates, (err, row, fields) => {
+            if(!err){
             // getting all the percentage values stored in array
             let arrayOfPercentages = row.map(obj => obj.winning_percent);
             // calculating average
             let averageRate = (arrayOfPercentages.reduce((a, b) => a + b) / arrayOfPercentages.length).toFixed(2);
-            if(averageRate == 0.00){
-                reject('Nobody won so far..');
+                if(averageRate == 0.00){
+                    reject('Nobody won so far..');
+                } else {
+                    resolve(averageRate);
+                }
             } else {
-                resolve(averageRate);
+                reject(err);
             }
         })
     })
@@ -182,11 +198,15 @@ const getWinner = () => {
     return new Promise ((resolve, reject) => {
         // query that returns all users and their winning rates
         db.query(query.playerPercentage, (err, row, fields) => {
-            let winningPlayer = row.reduce((max, currentPlayer) => max.winning_percent > currentPlayer.winning_percent ? max : currentPlayer);
-            if(winningPlayer.winning_percent === 0){
-                reject('There is no winner, it looks like nobody played or won');
+            if(!err){
+                let winningPlayer = row.reduce((max, currentPlayer) => max.winning_percent > currentPlayer.winning_percent ? max : currentPlayer);
+                if(winningPlayer.winning_percent === 0){
+                    reject('There is no winner, it looks like nobody played or won');
+                } else {
+                    resolve(winningPlayer);
+                }
             } else {
-                resolve(winningPlayer);
+                reject(err);
             }
         })
     })
@@ -195,14 +215,19 @@ const getWinner = () => {
 const getLoser = () => {
     return new Promise ((resolve, reject) => {
         db.query(query.playerPercentage, (err, row, fields) => {
+
+            if(!err){
             // using filter to have an array only with player that have scores > 0 (I've considered that players with 0 as score didn't not play or have always lost the games)
             let playersWithScoresHigherThanZero = row.filter(player => player.winning_percent > 0);
             // using reduce to find the lowest score among the ones > 0
             let loserPlayer = playersWithScoresHigherThanZero.reduce((min, currentPlayer) => min.winning_percent < currentPlayer.winning_percent ? min : currentPlayer);
-            if(loserPlayer.winning_percent === 0){
-                reject('It looks like nobody played');
+                if(loserPlayer.winning_percent === 0){
+                    reject('It looks like nobody played');
+                } else {
+                    resolve(loserPlayer);
+                }
             } else {
-                resolve(loserPlayer);
+                reject(err);
             }
         })
     })

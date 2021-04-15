@@ -1,7 +1,6 @@
 const { Router } = require('express');
 const router = Router();
-const player = require('../models/player'); // delete?
-const playerController = require('../controller/player.controller')
+const playerController = require('../controller/controller')
 
 /* ROUTES */
 

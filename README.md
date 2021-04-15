@@ -1,4 +1,4 @@
-# dice-app-api
+# dice-app-API
 
 ## Prove your luck by rolling the magic dices with this api. 
 
@@ -24,8 +24,7 @@
 
     If you want to update an existing user create a body like this: {
     "old_username": "<your old user>",
-    "new_username": "<your new user>"
-}
+    "new_username": "<your new user>"}
 
 #### POST /players/{id}/games/:
 
