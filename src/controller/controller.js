@@ -5,10 +5,11 @@ const player_create_post = async (req, res) => {
     // if user field is empty, inserts anonymous player
     if(req.body.username === ""){
         try {
-            await service.insertAnonymous();
+            let playerCreated = await service.insertAnonymous();
             res.json({
                 success: true,
-                message:'User created successfully'
+                message:'User created successfully',
+                player: playerCreated
             });
         } catch (error) {
             res.status(409)
@@ -21,10 +22,11 @@ const player_create_post = async (req, res) => {
     // inserts a player with unique username
         let username = req.body.username;
         try {
-            await service.insertUser(username);
+            let playerCreated = await service.insertUser(username);
             res.json({
                 success: true,
-                message:'User created successfully'
+                message:'User created successfully',
+                player: playerCreated
             });
         } catch (error) {
             res.status(409)

@@ -1,6 +1,6 @@
-const db = require('../config/dbConfig');
-const query = require('../repository/queries');
+const Player = require('../models/player');
 const uniqid  = require('uniqid');
+const db = require('../config/dbConfig')
 
 
 // rolls dices and returns an array with two numbers
@@ -12,31 +12,21 @@ const rollDices = () => {
 }
 
 // inserts an anonymous user 
-const insertAnonymous = () => {
+const insertAnonymous = async () => {
     let id = uniqid();
     let anonymousName = `ANONYMOUS-${id}`;
-    return new Promise((resolve, reject) =>{
-        db.query(query.insertAnonymous, anonymousName, (err, row, fields) =>{
-            if(!err){
-                resolve();
-            } else {
-                reject('User already exists, please select another one');
-            }
-        })
-    })
+    const newPlayer = new Player({
+        username: anonymousName
+    });
+    return await newPlayer.save();
 }
 
 // inserts a new unique user 
-const insertUser = (username) => {
-    return new Promise((resolve, reject) => {
-        db.query(query.insert, username, (err, row, fields) =>{
-            if(!err){
-                resolve(username);
-            } else {
-                reject('User already exists, please select another one');
-            }
-        })
-    })
+const insertUser = async (username) => {
+    const newPlayer = new Player({
+        username: username
+    });
+    return await newPlayer.save();
 }
 
 // insert a game table into the db

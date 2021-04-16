@@ -7,6 +7,7 @@ app.set('port', process.env.PORT || 3000)
 
 
 // Middlewares
+app.use(express.urlencoded(true));
 app.use(express.json());
 
 

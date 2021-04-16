@@ -1,13 +1,15 @@
 // setting up the DB
-const mysql = require('mysql');
+const mongoose = require('mongoose');
 
-const pool = mysql.createPool({
-    connectionLimit: 10,
-    host: '',   // example: 'localhost'
-    user: '',   // example: 'root'
-    password: '',  
-    database: 'dice_game'  // name of the DB
+
+mongoose
+    .connect('mongodb://localhost:27017/dice_game', { 
+        useNewUrlParser: true,
+        useUnifiedTopology: true
 })
+    .then(() => console.log('Db is connected'))
+    .catch(error => console.error('Connection error', error.message))
 
+const db = mongoose.createConnection();
 
-module.exports = pool;
+module.exports = db;
