@@ -49,39 +49,6 @@ const insertRoll = async (player_id) => {
         return newGame;
 }
 
-// checks if player exists with username provided
-const playerExist = async (old_username, new_username) => {
-    try {
-        let result = await Player.exists(
-            { username: old_username }
-        )
-        return result
-    } catch (error) {
-        return error
-    }
-
-}
-
-// check if player exists with id provided
-const playerExistId = (id) => {
-    return new Promise((resolve, reject) => {
-        db.query(query.existId, id, (err, row, fields) => {
-            if(!err){
-                // the query returns 1 if player exists and 0 if it doesn't
-                let queryName = fields[0].name;
-                let result = row[0][queryName];
-                if(result === 1){
-                    resolve(id);
-                } else {
-                    reject('User not found, please select an existing one');
-                }
-            } else {
-                reject(err);
-            }
-        })
-    })
-}
-
 // updates the player if he/she exists
 const updatePlayer = async (old_username, new_username) => {
     try {
@@ -96,16 +63,30 @@ const updatePlayer = async (old_username, new_username) => {
 }
 
 // deletes all game of a selected user
-const removeGames = (player_id) => {
-    return new Promise((resolve, reject) => {
-        db.query(query.remove, player_id, (err, row, fields) =>{
-            if(!err){
-                resolve('All games of selected user removed');
-            } else {
-                reject('User with id selected not found');
-            }
-        })
-    })
+const removeGames = async (player_id) => {
+    try {
+        let playerUpdated = Player.findOneAndUpdate(
+            { _id: player_id },
+            { games: [] },
+            { new: true }
+        )
+        return playerUpdated;
+    } catch (error) {
+        return error;
+    }
+
+
+
+
+    // return new Promise((resolve, reject) => {
+    //     db.query(query.remove, player_id, (err, row, fields) =>{
+    //         if(!err){
+    //             resolve('All games of selected user removed');
+    //         } else {
+    //             reject('User with id selected not found');
+    //         }
+    //     })
+    // })
 }
 
 // getting win rate percentage for each user
@@ -212,5 +193,5 @@ const getLoser = () => {
 
 
 module.exports = { rollDices, insertAnonymous, insertUser, 
-    insertRoll, updatePlayer, playerExist, playerExistId, removeGames, getWinRate, getGames,
+    insertRoll, updatePlayer, removeGames, getWinRate, getGames,
     getAverage, getWinner, getLoser };
