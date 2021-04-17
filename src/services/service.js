@@ -50,23 +50,16 @@ const insertRoll = async (player_id) => {
 }
 
 // checks if player exists with username provided
-const playerExist = (old_username, new_username) => {
-    return new Promise((resolve, reject) => {
-        db.query(query.exist, old_username, (err, row, fields) => {
-            if(!err){
-                let queryName = fields[0].name;
-                let result = row[0][queryName];
-                if(result ===1){
-                    let userArr = [old_username, new_username];
-                    resolve(userArr);
-                } else {
-                    reject('User not found, please select an existing one');
-                }
-            } else {
-                reject(err);
-            }
-        })
-    })
+const playerExist = async (old_username, new_username) => {
+    try {
+        let result = await Player.exists(
+            { username: old_username }
+        )
+        return result
+    } catch (error) {
+        return error
+    }
+
 }
 
 // check if player exists with id provided
@@ -90,16 +83,16 @@ const playerExistId = (id) => {
 }
 
 // updates the player if he/she exists
-const updatePlayer = (userArr) => {
-    return new Promise((resolve, reject) => {
-        db.query(query.update, [userArr[1], userArr[0]], (err, row, fields) => {
-            if(!err){
-                resolve('Username updated successfully');
-            }else{
-                reject(err);
-            }
-        })
-    })
+const updatePlayer = async (old_username, new_username) => {
+    try {
+        return await Player.findOneAndUpdate(
+            { username: old_username },
+            { $set:{ username:new_username } }, 
+            { new: true }
+        )
+    } catch (error) {
+        return error;
+    }
 }
 
 // deletes all game of a selected user

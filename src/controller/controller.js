@@ -51,11 +51,10 @@ const player_plays_post = async (req, res) => {
             game: newGame
         });
     } catch (error) {
-        console.log(error);
         res.status(400)
             .send({
             success: false,
-            error: 'User not found, please try with a valid ID'
+            message: 'User not found, please try with a valid ID'
         });
     }
 }
@@ -63,24 +62,31 @@ const player_plays_post = async (req, res) => {
 
 // player_update_put updates username
 const player_update_put = async (req, res) => {
-    // receives a body with old_username and new_username
+    // receives a body wiht old_username and new_username
     try {
         let old_username = req.body.old_username;
-        let new_username = req.body.new_username;
-        // this function checks if the username exists and returns a promise with an array containing the old and new user
-        let userArr = await service.playerExist(old_username, new_username);
-        // this function updates the user
-        await service.updatePlayer(userArr);
-        res.json({
-            success: true,
-            message:'User updated successfully'
-        });
+        let new_username = req.body.new_username
+        let playerUpdated = await service.updatePlayer(old_username, new_username);
+        // using this condition because there's no way for mongo to throw an error if user doesn't exist
+        if (playerUpdated === null){
+            res.status(400)
+            .send({
+                success: false,
+                message: 'Please select an existing user',
+            })
+        } else {
+            res.json({
+                success: true,
+                message: 'Updated successfully',
+                playerUpdated
+            })
+        }
     } catch (error) {
         res.status(400)
             .send({
-            success: false,
-            error: error
-        });
+                success: false,
+                error: error
+            })
     }
 }
 
