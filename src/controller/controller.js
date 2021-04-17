@@ -22,17 +22,19 @@ const player_create_post = async (req, res) => {
     // inserts a player with unique username
         let username = req.body.username;
         try {
-            let playerCreated = await service.insertUser(username);
+            let playerCreated = await service.insertUser(username)
             res.json({
                 success: true,
                 message:'User created successfully',
                 player: playerCreated
             });
         } catch (error) {
+            console.log(error);
             res.status(409)
             .send({
             success: false,
-            error: error
+            message: 'Username already exists',
+            MongoError: error
         });
         }
     }
@@ -42,17 +44,18 @@ const player_create_post = async (req, res) => {
 const player_plays_post = async (req, res) => {
     try {
         let player_id = req.params.id;
-        let result = await service.insertRoll(player_id)
+        let newGame = await service.insertRoll(player_id)
         res.json({
             success: true,
-            message:`Dices Rolled! You ${result}`
+            message:`Dices Rolled! You ${newGame.result}`,
+            game: newGame
         });
     } catch (error) {
         console.log(error);
         res.status(400)
             .send({
             success: false,
-            error: error
+            error: 'User not found, please try with a valid ID'
         });
     }
 }

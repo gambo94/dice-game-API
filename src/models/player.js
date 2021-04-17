@@ -16,6 +16,16 @@ const playerSchema = new Schema(
     { timestamps: true }
 )
 
+// creating a method to get the _id and the object {_id: <id>}
+playerSchema.methods.getId = function(){
+    return this.id;
+}
+
+playerSchema.methods.getIdObj = function(){
+    return {
+        '_id': this.id
+    }
+}
 const Player = model('Player', playerSchema);
 
 module.exports = Player;

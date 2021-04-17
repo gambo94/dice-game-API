@@ -1,4 +1,5 @@
 const Player = require('../models/player');
+const Game = require('../models/game');
 const uniqid  = require('uniqid');
 const db = require('../config/dbConfig')
 
@@ -26,33 +27,26 @@ const insertUser = async (username) => {
     const newPlayer = new Player({
         username: username
     });
-    return await newPlayer.save();
+    return await newPlayer.save()
 }
 
 // insert a game table into the db
-const insertRoll = (player_id) => {
-    return new Promise((resolve, reject) => {
+const insertRoll = async (player_id) => {
     // rolling dices and storing the results in array
         let dicesArray = rollDices();
-        let result = '';
-            // checking if player won
-        if (dicesArray[0] + dicesArray[1] === 7){
-            result = 'WIN';
-        } else {
-            result = 'LOSE';
-        }
-        db.query(query.game, [result, dicesArray[0], dicesArray[1], player_id], (err, row, fields) =>{
-            if(!err){
-                if(result === 'WIN' || result === 'LOSE'){
-                    resolve(result)
-                } else {
-                    reject(`There was a problem rolling your dices, try with a correct user :/`);
-                }
-            } else {
-                reject(err)
-            }
-        })
-    })
+    // storing in result whether player won
+        let result = dicesArray[0] + dicesArray[1] === 7 ? 'WIN' : 'LOSE';
+    // creating game object to be stored in player.game array
+        let newGame = new Game(dicesArray[0], dicesArray[1], result);
+    // updating user's game array by id
+        await Player.findOneAndUpdate(
+            { _id: player_id },
+            { $push: { games: newGame } },
+            // this will return the new updated object
+            { new : true}
+        );
+    // returning the game object to send with the JSON
+        return newGame;
 }
 
 // checks if player exists with username provided

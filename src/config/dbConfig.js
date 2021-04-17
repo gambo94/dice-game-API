@@ -5,7 +5,8 @@ const mongoose = require('mongoose');
 mongoose
     .connect('mongodb://localhost:27017/dice_game', { 
         useNewUrlParser: true,
-        useUnifiedTopology: true
+        useUnifiedTopology: true,
+        useFindAndModify: false 
 })
     .then(() => console.log('Db is connected'))
     .catch(error => console.error('Connection error', error.message))
