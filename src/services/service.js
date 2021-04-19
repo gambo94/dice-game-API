@@ -1,7 +1,8 @@
 const Player = require('../models/player');
 const Game = require('../models/game');
 const uniqid  = require('uniqid');
-const db = require('../config/dbConfig')
+const db = require('../config/dbConfig');
+const { TokenExpiredError } = require('jsonwebtoken');
 
 
 // rolls dices and returns an array with two numbers
@@ -36,17 +37,15 @@ const insertRoll = async (player_id) => {
         let dicesArray = rollDices();
     // storing in result whether player won
         let result = dicesArray[0] + dicesArray[1] === 7 ? 'WIN' : 'LOSE';
-    // creating game object to be stored in player.game array
-        let newGame = new Game(dicesArray[0], dicesArray[1], result);
+    // creating game document
+        const newGame = new Game({
+            dice_one: dicesArray[0], 
+            dice_two: dicesArray[1], 
+            result, 
+            player_id
+        });
     // updating user's game array by id
-        await Player.findOneAndUpdate(
-            { _id: player_id },
-            { $push: { games: newGame } },
-            // this will return the new updated object
-            { new : true}
-        );
-    // returning the game object to send with the JSON
-        return newGame;
+        return await newGame.save();
 }
 
 // updates the player if he/she exists
@@ -64,131 +63,125 @@ const updatePlayer = async (old_username, new_username) => {
 
 // deletes all game of a selected user
 const removeGames = async (player_id) => {
-    try {
-        let playerUpdated = Player.findOneAndUpdate(
-            { _id: player_id },
-            { games: [] },
-            { new: true }
+
+        let response =  await Game.deleteMany(
+            { player_id: player_id }
         )
-        return playerUpdated;
-    } catch (error) {
-        return error;
-    }
+    console.log(response);
+    console.log(response.deletedCount)
+    return response.deletedCount;
 
-
-
-
-    // return new Promise((resolve, reject) => {
-    //     db.query(query.remove, player_id, (err, row, fields) =>{
-    //         if(!err){
-    //             resolve('All games of selected user removed');
-    //         } else {
-    //             reject('User with id selected not found');
-    //         }
-    //     })
-    // })
 }
 
 // getting win rate percentage for each user
-const getWinRate = () => {
-    return new Promise ((resolve, reject) => {
-        db.query(query.rates, (err, row, fields) => {
-            if(!err){
-                if(row.length > 0){
-                    resolve(row);
-                } else if(row.length === 0){
-                    reject('No one played the game :(')
-                }
-            } else {
-                reject(err);
-            }
-        })
-    })
+const getWinRate = async () => {
+    // get all players' id and username and storing them in array 
+    let allPlayers = await Player.find({}, {username: 1});
+    // array where to store the users with theirs rates score
+    let finalArray = [];
+    // return number of wins for one given user
+    for (let i = 0; i < allPlayers.length; i++){
+        let numberWins = await Game.find({'result':'WIN', 'player_id': allPlayers[i]._id}).countDocuments();
+        let numberGames = await Game.find({'player_id': allPlayers[i]._id}).countDocuments();
+        let winRate = (((numberWins/numberGames).toFixed(2))*100).toFixed();
+        let newObj = {
+            username: allPlayers[i].username,
+            winRate: winRate
+        }
+        finalArray.push(newObj);
+    }
+    // filtering the array to remove players who don't have games
+    const newFinal = finalArray.filter((obj)=> !isNaN(obj.winRate));
+    return newFinal;
 }
 
 // getting single player games
-const getGames = (player_id) => {
-    return new Promise ((resolve, reject) => {
-        db.query(query.playerGames, player_id, (err, row, fields) => {
-            // if(!err && row.length > 0){
-            //     resolve(row);
-            // } else if(row.length === 0){
-            //     reject('It seems the user did not play or doesnt exist :(')
-            // } else {
-            //     reject(err);
-            // }
-            if(!err){
-                if(row.length > 0){
-                    resolve(row);
-                } else if(row.length === 0){
-                    reject('It seems the user did not play or doesnt exist :(')
-                }
-            } else {
-                reject(err);
-            }
-        })
-    })
+const getGames = async (player_id) => {
+    const gamesOfSelectedPlayer = await Game.find({player_id: player_id})
+    if (gamesOfSelectedPlayer.length > 0){
+            return gamesOfSelectedPlayer;
+        } else {
+            console.log('hola');
+            throw new Error('Please select a valid user who played at least one game')
+        }
 }
 
 
 // average of the percentage of success of all users
-const getAverage = () => {
-    return new Promise ((resolve, reject) => {
-        db.query(query.rates, (err, row, fields) => {
-            if(!err){
-            // getting all the percentage values stored in array
-            let arrayOfPercentages = row.map(obj => obj.winning_percent);
-            // calculating average
-            let averageRate = (arrayOfPercentages.reduce((a, b) => a + b) / arrayOfPercentages.length).toFixed(2);
-                if(averageRate == 0.00){
-                    reject('Nobody won so far..');
-                } else {
-                    resolve(averageRate);
-                }
-            } else {
-                reject(err);
-            }
-        })
-    })
+const getAverage = async () => {
+    // get all players' id and storing them in array 
+    let allPlayers = await Game.distinct('player_id')
+    // array where to store the users with theirs rates score
+    let winAvgScoresArray = [];
+    // return number of wins for one given user
+    for (let i = 0; i < allPlayers.length; i++){
+        let numberWins = await Game.find({'result':'WIN', 'player_id': allPlayers[i]}).countDocuments();
+        let numberGames = await Game.find({'player_id': allPlayers[i]}).countDocuments();
+        let winRate = ((numberWins/numberGames).toFixed(2))*100;
+        
+        winAvgScoresArray.push(winRate);
+    }
+    if(winAvgScoresArray.length > 0){
+            // getting the average
+    let average = winAvgScoresArray.reduce((a, b) => a + b) / winAvgScoresArray.length;
+    return average;
+    } else {
+        throw new Error('Nobody played the game :(')
+    }
+
+
 }
 
-const getWinner = () => {
-    return new Promise ((resolve, reject) => {
-        // query that returns all users and their winning rates
-        db.query(query.playerPercentage, (err, row, fields) => {
-            if(!err){
-                let winningPlayer = row.reduce((max, currentPlayer) => max.winning_percent > currentPlayer.winning_percent ? max : currentPlayer);
-                if(winningPlayer.winning_percent === 0){
-                    reject('There is no winner, it looks like nobody played or won');
-                } else {
-                    resolve(winningPlayer);
-                }
-            } else {
-                reject(err);
+const getWinner = async () => {
+        // get all players' id and username and storing them in array 
+        let allPlayers = await Player.find({}, {username: 1});
+        // array where to store the users with theirs rates score
+        let finalArray = [];
+        // return number of wins for one given user
+        for (let i = 0; i < allPlayers.length; i++){
+            let numberWins = await Game.find({'result':'WIN', 'player_id': allPlayers[i]._id}).countDocuments();
+            let numberGames = await Game.find({'player_id': allPlayers[i]._id}).countDocuments();
+            let winRate = (((numberWins/numberGames).toFixed(2))*100);
+            let newObj = {
+                username: allPlayers[i].username,
+                winRate: winRate
             }
+            finalArray.push(newObj);
+        }
+        // filtering the array to remove players who don't have games
+        const newFinal = finalArray.filter((obj)=> !isNaN(obj.winRate));
+        console.log(newFinal) ;
+        // getting the player who score is higher
+        let winningPlayer = newFinal.reduce((max, currentPlayer) => {
+            return max.winRate > currentPlayer.winRate ? max : currentPlayer;
         })
-    })
+        return winningPlayer;
 }
 
-const getLoser = () => {
-    return new Promise ((resolve, reject) => {
-        db.query(query.playerPercentage, (err, row, fields) => {
-
-            if(!err){
-            // using filter to have an array only with player that have scores > 0 (I've considered that players with 0 as score didn't not play or have always lost the games)
-            let playersWithScoresHigherThanZero = row.filter(player => player.winning_percent > 0);
-            // using reduce to find the lowest score among the ones > 0
-            let loserPlayer = playersWithScoresHigherThanZero.reduce((min, currentPlayer) => min.winning_percent < currentPlayer.winning_percent ? min : currentPlayer);
-                if(loserPlayer.winning_percent === 0){
-                    reject('It looks like nobody played');
-                } else {
-                    resolve(loserPlayer);
-                }
-            } else {
-                reject(err);
+const getLoser = async () => {
+        // get all players' id and username and storing them in array 
+        let allPlayers = await Player.find({}, {username: 1});
+        // array where to store the users with theirs rates score
+        let finalArray = [];
+        // return number of wins for one given user
+        for (let i = 0; i < allPlayers.length; i++){
+            let numberWins = await Game.find({'result':'WIN', 'player_id': allPlayers[i]._id}).countDocuments();
+            let numberGames = await Game.find({'player_id': allPlayers[i]._id}).countDocuments();
+            let winRate = (((numberWins/numberGames).toFixed(2))*100);
+            let newObj = {
+                username: allPlayers[i].username,
+                winRate: winRate
             }
+            finalArray.push(newObj);
+        }
+        // filtering the array to remove players who don't have games
+        const newFinal = finalArray.filter((obj)=> !isNaN(obj.winRate));
+        console.log(newFinal) ;
+        // getting the player who score is higher
+        let losingPlayer = newFinal.reduce((min, currentPlayer) => {
+            return min.winRate < currentPlayer.winRate ? min : currentPlayer;
         })
-    })
+        return losingPlayer;
 }
 
 

@@ -94,19 +94,18 @@ const player_update_put = async (req, res) => {
 const player_deleteGame_delete = async (req, res) => {
     try {
         let player_id = req.params.id;
-        let playerUpdated = await service.removeGames(player_id);
-        // using this condition because there's no way for mongo to throw an error if user doesn't exist
-        if (playerUpdated === null){
-            res.status(400)
-            .send({
-                success: false,
-                message: 'Please select an existing user',
+        let deletedCount = await service.removeGames(player_id);
+        if(deletedCount > 0){
+            res.json({
+                success: true,
+                message: 'Games deleted successfully',
+                deletedCount
             })
         } else {
             res.json({
                 success: true,
-                message: 'Updated successfully',
-                games: playerUpdated.games
+                message: 'No games to be deleted for selected user',
+                deletedCount
             })
         }
     } catch (error) {
@@ -150,7 +149,7 @@ const player_games_get = async (req, res) => {
         res.status(400)
             .send({
             success: false,
-            error: error
+            error: 'Please select a valid user who played at least one game'
         });
     }
 }
@@ -167,7 +166,7 @@ const player_average_ranking = async (req, res) => {
         res.status(400)
             .send({
             success: false,
-            error: error
+            error: 'Nobody played the game :('
         });
     }
 }

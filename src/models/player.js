@@ -3,15 +3,7 @@ const { Schema, model } = require('mongoose');
 
 const playerSchema = new Schema(
     {
-    username: {type: String, required: true, unique: true},
-    games : [
-        {
-            dice_one: { type: Number},
-            dice_two: { type: Number},
-            result: {type : String},
-            player_id: {type: String}
-        }
-    ]
+    username: {type: String, required: true, unique: true}
     },
     { timestamps: true }
 )
