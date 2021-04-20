@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
-const playerRoutes = require('./routes/routes')
+const playerRoutes = require('./routes/routes');
+const verifyToken = require('./middlewares/tokenAuth');
+const login = require('./controller/authController');
 
 // Settings
 app.set('port', process.env.PORT || 3000)
@@ -10,9 +12,11 @@ app.set('port', process.env.PORT || 3000)
 app.use(express.urlencoded(true));
 app.use(express.json());
 
+// Creating a fake login to generate the JWT
+app.post('/login', login);
 
-// Routes
-app.use(playerRoutes);
+// API routes
+app.use(verifyToken, playerRoutes);
 
 
 // listening to the server
