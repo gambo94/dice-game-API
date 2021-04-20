@@ -63,12 +63,9 @@ const updatePlayer = async (old_username, new_username) => {
 
 // deletes all game of a selected user
 const removeGames = async (player_id) => {
-
         let response =  await Game.deleteMany(
             { player_id: player_id }
         )
-    console.log(response);
-    console.log(response.deletedCount)
     return response.deletedCount;
 
 }
@@ -118,7 +115,6 @@ const getAverage = async () => {
         let numberWins = await Game.find({'result':'WIN', 'player_id': allPlayers[i]}).countDocuments();
         let numberGames = await Game.find({'player_id': allPlayers[i]}).countDocuments();
         let winRate = ((numberWins/numberGames).toFixed(2))*100;
-        
         winAvgScoresArray.push(winRate);
     }
     if(winAvgScoresArray.length > 0){
@@ -128,8 +124,6 @@ const getAverage = async () => {
     } else {
         throw new Error('Nobody played the game :(')
     }
-
-
 }
 
 const getWinner = async () => {
@@ -150,7 +144,6 @@ const getWinner = async () => {
         }
         // filtering the array to remove players who don't have games
         const newFinal = finalArray.filter((obj)=> !isNaN(obj.winRate));
-        console.log(newFinal) ;
         // getting the player who score is higher
         let winningPlayer = newFinal.reduce((max, currentPlayer) => {
             return max.winRate > currentPlayer.winRate ? max : currentPlayer;
@@ -176,7 +169,6 @@ const getLoser = async () => {
         }
         // filtering the array to remove players who don't have games
         const newFinal = finalArray.filter((obj)=> !isNaN(obj.winRate));
-        console.log(newFinal) ;
         // getting the player who score is higher
         let losingPlayer = newFinal.reduce((min, currentPlayer) => {
             return min.winRate < currentPlayer.winRate ? min : currentPlayer;
