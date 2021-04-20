@@ -1,15 +1,20 @@
-# dice-app-API
+# dice-app-API+MongoDB+JWT
 
 ## Prove your luck by rolling the magic dices with this api. 
 
 ### installation:
     - npm install
-    - run the diceDB.sql script to create the database and its tables
     - insert your database configuration data in the dbConfig.js file located in the 'config' folder
 
 ### usage:
 
     Start app with << npm start >>
+
+### generate token:
+    - the token allows you to visit all the routes below
+    - make sure to generate one by visiting http://localhost:3000/login
+    - insert the token in the headers before clicking send 
+    - in the header insert Authorization: Bearer <your generated token> 
 
 
 ### routes
