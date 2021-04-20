@@ -1,6 +1,6 @@
 # dice-app-API
 
-## Prove your luck by rolling the magic dices with this api. 
+## Prove your luck by rolling the magic dice with this api. 
 
 ### installation:
     - npm install
