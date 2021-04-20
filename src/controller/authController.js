@@ -10,7 +10,7 @@ const loginGeneratesToken = async (req, res) => {
     const user = { name: username };
 
 
-    jwt.sign(user, 'secretkey', { expiresIn: 60 }, (err, token) => {
+    jwt.sign(user, 'secretkey', (err, token) => {
         if(err) return err;
         res.json({
             token

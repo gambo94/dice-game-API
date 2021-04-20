@@ -12,7 +12,7 @@ function verifyToken(req, res, next){
     if (token == null) return res.status(401)
         .send({
             success: false,
-            error: 'Please be sure to provide a token'
+            error: 'Please be sure to provide a token by visiting /login'
         });
 
     // verifying the token 

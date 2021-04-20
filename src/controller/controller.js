@@ -29,7 +29,6 @@ const player_create_post = async (req, res) => {
                 player: playerCreated
             });
         } catch (error) {
-            console.log(error);
             res.status(409)
             .send({
             success: false,

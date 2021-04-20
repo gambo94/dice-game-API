@@ -8,8 +8,8 @@ mongoose
         useUnifiedTopology: true,
         useFindAndModify: false 
 })
-    .then(() => console.log('Db is connected'))
-    .catch(error => console.error('Connection error', error.message))
+    .then(() => console.log('MongoDB is connected'))
+    .catch(error => console.error('Could not connect to MongoDB:', error.message))
 
 const db = mongoose.createConnection();
 
