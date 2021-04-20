@@ -152,13 +152,6 @@ const getWinRate = () => {
 const getGames = (player_id) => {
     return new Promise ((resolve, reject) => {
         db.query(query.playerGames, player_id, (err, row, fields) => {
-            // if(!err && row.length > 0){
-            //     resolve(row);
-            // } else if(row.length === 0){
-            //     reject('It seems the user did not play or doesnt exist :(')
-            // } else {
-            //     reject(err);
-            // }
             if(!err){
                 if(row.length > 0){
                     resolve(row);
@@ -215,12 +208,9 @@ const getWinner = () => {
 const getLoser = () => {
     return new Promise ((resolve, reject) => {
         db.query(query.playerPercentage, (err, row, fields) => {
-
             if(!err){
-            // using filter to have an array only with player that have scores > 0 (I've considered that players with 0 as score didn't not play or have always lost the games)
-            let playersWithScoresHigherThanZero = row.filter(player => player.winning_percent > 0);
             // using reduce to find the lowest score among the ones > 0
-            let loserPlayer = playersWithScoresHigherThanZero.reduce((min, currentPlayer) => min.winning_percent < currentPlayer.winning_percent ? min : currentPlayer);
+            let loserPlayer = row.reduce((min, currentPlayer) => min.winning_percent < currentPlayer.winning_percent ? min : currentPlayer);
                 if(loserPlayer.winning_percent === 0){
                     reject('It looks like nobody played');
                 } else {
