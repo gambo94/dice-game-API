@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 
 mongoose
-    .connect('mongodb://localhost:27017/dice_game', { 
+    .connect('mongodb://localhost:27017/dice_game', { // change the string by selecting you localhost + /dice_game
         useNewUrlParser: true,
         useUnifiedTopology: true,
         useFindAndModify: false 
