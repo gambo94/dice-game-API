@@ -12,7 +12,8 @@
 
 ### generate token:
     - the token allows you to visit all the routes below
-    - make sure to generate one by visiting http://localhost:3000/login
+    - make sure to generate one by visiting http://localhost:3000/login and by inserting the correct
+        username and password in the req body. You can copy and paste this: { "username": "fakeone", "pwd": "123abc" }
     - insert the token in the headers before clicking send 
     - in the header insert Authorization: Bearer <your generated token> 
 
