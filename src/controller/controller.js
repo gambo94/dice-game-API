@@ -40,13 +40,13 @@ const player_create_post = async (req, res) => {
 const player_plays_post = async (req, res) => {
     try {
         let player_id = req.params.id;
-        let result = await service.insertRoll(player_id)
+        let existPlayerId = await service.playerExistId(player_id)
+        let result = await service.insertRoll(existPlayerId)
         res.json({
             success: true,
             message:`Dices Rolled! You ${result}`
         });
     } catch (error) {
-        console.log(error);
         res.status(400)
             .send({
             success: false,
@@ -108,7 +108,7 @@ const player_winRate_get = async (req, res) => {
             'users_winning_rates': usersWinRate
         });
     } catch (error) {
-        res.status(400)
+        res.status(204)
             .send({
             success: false,
             error: error
@@ -144,7 +144,7 @@ const player_average_ranking = async (req, res) => {
             message:`Average winning rate: ${result}%`
         });
     } catch (error) {
-        res.status(400)
+        res.status(204)
             .send({
             success: false,
             error: error
@@ -162,7 +162,7 @@ const player_winner = async (req, res) => {
             winner: winner
         });
     } catch (error) {
-        res.status(400)
+        res.status(204)
             .send({
             success: false,
             error: error
@@ -179,7 +179,7 @@ const player_loser = async (req, res) => {
             loser: loser
         });
     } catch (error) {
-        res.status(400)
+        res.status(204)
             .send({
             success: false,
             error: error

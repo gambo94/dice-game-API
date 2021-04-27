@@ -42,13 +42,14 @@ const remove = `
 
 // query for getting win percentage rate of every user
 const rates = `
-    SELECT player_id, username,
+    SELECT id_player, username,
     COUNT(result) games_played,
     ROUND(100 * SUM(result = 'WIN') / COUNT(result)) winning_percent
-    FROM game
-    INNER JOIN player ON player_id = id_player
-    GROUP BY player_id;
-`;
+    FROM player 
+    left JOIN game ON id_player = player_id
+    GROUP BY id_player;
+`
+
 
 // query for getting all the games fields of a player
 const playerGames = `
