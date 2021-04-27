@@ -127,7 +127,7 @@ const player_games_get = async (req, res) => {
             games: playerGames
         });
     } catch (error) {
-        res.status(400)
+        res.status(204)
             .send({
             success: false,
             error: error

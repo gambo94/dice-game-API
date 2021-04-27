@@ -195,7 +195,7 @@ const getWinner = () => {
 const getLoser = () => {
     return new Promise ((resolve, reject) => {
         db.query(query.playerPercentage, (err, row, fields) => {
-            if(!err){
+            if(!err && row.length >0){
             // using reduce to find the lowest score among the ones > 0
             let loserPlayer = row.reduce((min, currentPlayer) => min.winning_percent < currentPlayer.winning_percent ? min : currentPlayer);
                 if(loserPlayer.winning_percent === 0){
